@@ -1,129 +1,191 @@
-<script>
-    // --- COMMON CHART OPTIONS ---
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        indexAxis: 'y', // This makes the bars horizontal
-        plugins: {
-            tooltip: {
-                backgroundColor: 'rgba(11, 17, 32, 0.95)',
-                titleFont: { family: 'JetBrains Mono', size: 13 },
-                bodyFont: { family: 'Inter', size: 12 },
-                padding: 12,
-                cornerRadius: 4,
-                callbacks: {
-                    // Custom Tooltip to explain the specific phase
-                    title: function (context) {
-                        return context[0].dataset.label;
-                    },
-                    label: function (context) {
-                        return " Duration: " + context.raw + " Weeks";
-                    }
-                }
-            },
-            legend: { display: false } // We hide the default legend for a cleaner look
-        },
-        scales: {
-            x: {
-                stacked: true, // This stacks the time blocks
-                title: { display: true, text: 'Weeks Until "Go Live"', font: { family: 'JetBrains Mono', size: 10 }, color: '#94A3B8' },
-                grid: { color: '#F1F5F9' },
-                min: 0,
-                max: 12
-            },
-            y: {
-                stacked: true,
-                grid: { display: false },
-                ticks: {
-                    font: { family: 'JetBrains Mono', weight: '700', size: 12 },
-                    color: '#0F172A'
-                }
-            }
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fidelity Bitcoin Strategy: Execution & Liquidity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- GLOBAL STYLES --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            color: #0F172A;
+            scroll-behavior: smooth;
         }
-    };
 
-    // --- CHART 1: TIMELINE REALITY (FIXED) ---
-    const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
-
-    new Chart(ctxTimeline, {
-        type: 'bar',
-        data: {
-            labels: ["Option A: Standard", "Option B: Sovereign"],
-            datasets: [
-                // SEGMENT 1: ADMIN & LEGAL
-                {
-                    label: 'Phase 1: Paperwork / NSA Approval',
-                    data: [2, 4], // Option A: 2 weeks, Option B: 4 weeks
-                    backgroundColor: [
-                        '#3B82F6', // Blue (A)
-                        '#EA580C'  // Dark Orange (B)
-                    ],
-                    barPercentage: 0.6,
-                    borderRadius: 4
-                },
-                // SEGMENT 2: TECHNICAL SETUP
-                {
-                    label: 'Phase 2: Hardware & Keys',
-                    data: [0, 4], // Option A: 0, Option B: 4 weeks
-                    backgroundColor: [
-                        '#3B82F6',
-                        '#F97316'  // Orange
-                    ],
-                    barPercentage: 0.6,
-                    borderRadius: 4,
-                    borderSkipped: false
-                },
-                // SEGMENT 3: FINAL TRANSFER
-                {
-                    label: 'Phase 3: Funding & Transfer',
-                    data: [0, 2], // Option A: 0, Option B: 2 weeks
-                    backgroundColor: [
-                        '#3B82F6',
-                        '#FDBA74'  // Light Orange
-                    ],
-                    barPercentage: 0.6,
-                    borderRadius: 4,
-                    borderSkipped: false
-                }
-            ]
-        },
-        options: commonOptions
-    });
-
-    // --- CHART 2: LIQUIDITY PENALTY (Unchanged) ---
-    const ctxPenalty = document.getElementById('penaltyChart').getContext('2d');
-
-    new Chart(ctxPenalty, {
-        type: 'bar',
-        data: {
-            labels: ['Gross Profit', 'Taxes & Penalty', 'You Keep'],
-            datasets: [{
-                label: 'Amount ($)',
-                data: [40000, 18800, 21200],
-                backgroundColor: [
-                    '#E2E8F0', // Gray
-                    '#EF4444', // Red
-                    '#10B981'  // Green
-                ],
-                borderRadius: 4,
-                barThickness: 50
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#F1F5F9' },
-                    ticks: { font: { family: 'JetBrains Mono' } }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { family: 'Inter', weight: 'bold' } }
-                }
-            }
+        h1,
+        h2,
+        h3,
+        h4,
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
         }
-    });
-</script>
+
+        /* --- HEADER --- */
+        .tech-header {
+            background-color: #0B1120;
+            color: white;
+            border-bottom: 4px solid #F7931A;
+        }
+
+        .tag-orange {
+            background-color: #F7931A;
+            color: #0B1120;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        /* --- CARDS & CONTAINERS --- */
+        .card-base {
+            background: white;
+            border-radius: 6px;
+            padding: 24px;
+        }
+
+        /* Option A: Standard Look */
+        .card-standard {
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Option B: Highlight Look */
+        .card-highlight {
+            border: 2px solid #F7931A;
+            box-shadow: 0 4px 6px -1px rgba(247, 147, 26, 0.1);
+            position: relative;
+        }
+
+        /* Dark Card for Loans */
+        .card-dark {
+            background-color: #0B1120;
+            color: white;
+            border-radius: 6px;
+            padding: 24px;
+        }
+
+        .badge-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #F7931A;
+            color: white;
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-bottom-left-radius: 6px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* --- CHECKLISTS --- */
+        .check-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #CBD5E1;
+            border-radius: 4px;
+            margin-right: 12px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        /* --- ALERTS & WARNINGS --- */
+        .alert-box {
+            background-color: #FEF2F2;
+            border-left: 4px solid #EF4444;
+            padding: 16px;
+            color: #991B1B;
+            font-size: 0.875rem;
+        }
+
+        .warning-box {
+            border-left: 4px solid #F59E0B;
+            background-color: #FFFBEB;
+            color: #92400E;
+            padding: 16px;
+            font-size: 0.875rem;
+        }
+
+        /* --- CHARTS --- */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            border-top: 1px dashed #CBD5E1;
+            margin-top: 4rem;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .section-tag {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #F8FAFC;
+            padding: 0 16px;
+            color: #64748B;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- MASTER HEADER -->
+    <header class="tech-header py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center space-x-4 mb-6">
+                <span class="tag-orange">OPERATIONS MANUAL</span>
+                <span class="text-gray-400 text-xs mono-font">FIDELITY 401(k) BITCOIN STRATEGY</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                Execution Guide &<br>Liquidity Reality
+            </h1>
+            <p class="text-gray-400 font-light text-lg max-w-3xl leading-relaxed">
+                A unified directive for transitioning your retirement assets to Bitcoin,
+                comparing the <strong>Standard vs. Sovereign</strong> paths, and detailing the
+                <strong>Golden Handcuffs</strong> regarding access to capital.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-20">
+
+        <!-- ========================================== -->
+        <!-- PART 1: THE EXECUTION (GETTING IN)         -->
+        <!-- ========================================== -->
+
+        <section>
+            <div class="flex items-center justify-between mb-8 border-b border-gray-200 pb-4">
+                <h2 class="text-3xl font-bold text-[#0B1120]">1. Select Your Option</h2>
+                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs font-bold">PHASE 1: DEPLOYMENT</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Option A: Standard -->
+                <div class="card-base card-standard">
+                    <h3 class="mono-font text-xl font-bold text-gray-500 mb-2">Option A: The "Standard" Path</h3>
+                    <div class="bg-blue-50 text-blue-800 px-3 py-2 rounded mb-6 text-sm font-bold
