@@ -1,53 +1,33 @@
 <script>
-    // --- UTILITY: Label Wrapping Logic ---
-    function formatLabel(str, maxwidth) {
-        var sections = [];
-        var words = str.split(" ");
-        var temp = "";
-        words.forEach(function (item, index) {
-            if (temp.length > 0) {
-                var concat = temp + ' ' + item;
-                if (concat.length > maxwidth) {
-                    sections.push(temp);
-                    temp = item;
-                } else {
-                    temp = concat;
-                }
-            } else {
-                temp = item;
-            }
-            if (index === words.length - 1) {
-                sections.push(temp);
-            }
-        });
-        return sections;
-    }
-
+    // --- COMMON CHART OPTIONS ---
     const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
-        indexAxis: 'y', // Horizontal Bar Chart
+        indexAxis: 'y', // This makes the bars horizontal
         plugins: {
             tooltip: {
                 backgroundColor: 'rgba(11, 17, 32, 0.95)',
-                titleFont: { family: 'JetBrains Mono' },
+                titleFont: { family: 'JetBrains Mono', size: 13 },
+                bodyFont: { family: 'Inter', size: 12 },
                 padding: 12,
+                cornerRadius: 4,
                 callbacks: {
+                    // Custom Tooltip to explain the specific phase
                     title: function (context) {
-                        return context[0].label.replaceAll(',', ' '); // Fix array commas in tooltip
+                        return context[0].dataset.label;
                     },
                     label: function (context) {
                         return " Duration: " + context.raw + " Weeks";
                     }
                 }
             },
-            legend: { display: false } // We use the custom HTML legend above
+            legend: { display: false } // We hide the default legend for a cleaner look
         },
         scales: {
             x: {
-                stacked: true,
-                title: { display: true, text: 'Weeks Until First Bitcoin Trade', font: { family: 'JetBrains Mono' } },
-                grid: { color: '#E2E8F0' },
+                stacked: true, // This stacks the time blocks
+                title: { display: true, text: 'Weeks Until "Go Live"', font: { family: 'JetBrains Mono', size: 10 }, color: '#94A3B8' },
+                grid: { color: '#F1F5F9' },
                 min: 0,
                 max: 12
             },
@@ -55,62 +35,53 @@
                 stacked: true,
                 grid: { display: false },
                 ticks: {
-                    font: { family: 'JetBrains Mono', size: 12 },
+                    font: { family: 'JetBrains Mono', weight: '700', size: 12 },
                     color: '#0F172A'
                 }
             }
         }
     };
 
-    // --- CHART: TIMELINE REALITY ---
+    // --- CHART 1: TIMELINE REALITY (FIXED) ---
     const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
-
-    // Revised Data: Only showing the SETUP BURDEN (Time to Go Live)
-    // Option A: 1 step (2 weeks)
-    // Option B: 3 steps (4 weeks + 4 weeks + 2 weeks)
-
-    const labels = [
-        "Option A: Standard",
-        "Option B: Sovereign"
-    ];
 
     new Chart(ctxTimeline, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: ["Option A: Standard", "Option B: Sovereign"],
             datasets: [
-                // --- SEGMENT 1: INITIAL PAPERWORK / APPROVAL ---
+                // SEGMENT 1: ADMIN & LEGAL
                 {
-                    label: 'Phase 1: Legal/Admin',
-                    data: [2, 4], // A: 2wks, B: 4wks
+                    label: 'Phase 1: Paperwork / NSA Approval',
+                    data: [2, 4], // Option A: 2 weeks, Option B: 4 weeks
                     backgroundColor: [
                         '#3B82F6', // Blue (A)
                         '#EA580C'  // Dark Orange (B)
                     ],
-                    barThickness: 40,
+                    barPercentage: 0.6,
                     borderRadius: 4
                 },
-                // --- SEGMENT 2: TECHNICAL SETUP ---
+                // SEGMENT 2: TECHNICAL SETUP
                 {
-                    label: 'Phase 2: Tech Setup',
-                    data: [0, 4], // A: 0 (Done), B: 4wks (Keys)
+                    label: 'Phase 2: Hardware & Keys',
+                    data: [0, 4], // Option A: 0, Option B: 4 weeks
                     backgroundColor: [
                         '#3B82F6',
                         '#F97316'  // Orange
                     ],
-                    barThickness: 40,
+                    barPercentage: 0.6,
                     borderRadius: 4,
                     borderSkipped: false
                 },
-                // --- SEGMENT 3: CUSTODY TRANSFER ---
+                // SEGMENT 3: FINAL TRANSFER
                 {
-                    label: 'Phase 3: Final Transfer',
-                    data: [0, 2], // A: 0 (Done), B: 2wks (Funding)
+                    label: 'Phase 3: Funding & Transfer',
+                    data: [0, 2], // Option A: 0, Option B: 2 weeks
                     backgroundColor: [
                         '#3B82F6',
                         '#FDBA74'  // Light Orange
                     ],
-                    barThickness: 40,
+                    barPercentage: 0.6,
                     borderRadius: 4,
                     borderSkipped: false
                 }
@@ -119,7 +90,7 @@
         options: commonOptions
     });
 
-    // --- CHART 2: LIQUIDITY PENALTY (Keep existing) ---
+    // --- CHART 2: LIQUIDITY PENALTY (Unchanged) ---
     const ctxPenalty = document.getElementById('penaltyChart').getContext('2d');
 
     new Chart(ctxPenalty, {
@@ -130,7 +101,9 @@
                 label: 'Amount ($)',
                 data: [40000, 18800, 21200],
                 backgroundColor: [
-                    '#E2E8F0', '#EF4444', '#10B981'
+                    '#E2E8F0', // Gray
+                    '#EF4444', // Red
+                    '#10B981'  // Green
                 ],
                 borderRadius: 4,
                 barThickness: 50
@@ -141,8 +114,15 @@
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { beginAtZero: true, grid: { color: '#F1F5F9' } },
-                x: { grid: { display: false }, ticks: { font: { family: 'Inter', weight: 'bold' } } }
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#F1F5F9' },
+                    ticks: { font: { family: 'JetBrains Mono' } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: 'Inter', weight: 'bold' } }
+                }
             }
         }
     });
